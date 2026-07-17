@@ -7,7 +7,8 @@ source.include_exts = py,png,jpg,kv,atlas
 version = 0.1
 
 # Kivy aur baqi libraries jo aapki app ko chahiye
-requirements = python3,kivy==2.3.0,qrcode,pillow,requests,urllib3,certifi
+# Updated to Kivy 2.4.0 for better Python 3.14 compatibility
+requirements = python3,kivy==2.4.0,qrcode,pillow,requests,urllib3,certifi
 
 orientation = portrait
 fullscreen = 1
