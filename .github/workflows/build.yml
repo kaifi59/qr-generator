@@ -9,21 +9,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Get Date
       id: get-date
       run: |
         echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-    - name: SSH Agent Passthrough
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      continue-on-error: true
-
     - name: Set up Actions Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.buildozer
         key: ${{ runner.os }}-buildozer-${{ steps.get-date.outputs.date }}
@@ -35,7 +29,7 @@ jobs:
         repository_root: .
 
     - name: Upload APK Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: package
         path: bin/*.apk
