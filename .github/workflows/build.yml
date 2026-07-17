@@ -1,0 +1,41 @@
+name: CI
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Get Date
+      id: get-date
+      run: |
+        echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+    - name: SSH Agent Passthrough
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      continue-on-error: true
+
+    - name: Set up Actions Cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ steps.get-date.outputs.date }}
+
+    - name: Build with Buildozer
+      uses: ArtemGovorov/buildozer-action@v1
+      with:
+        command: buildozer android debug
+        repository_root: .
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: package
+        path: bin/*.apk
