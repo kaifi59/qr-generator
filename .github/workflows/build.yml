@@ -24,6 +24,8 @@ jobs:
           build-essential \
           ccache \
           git \
+          curl \
+          wget \
           libffi-dev \
           libssl-dev \
           libtool \
@@ -39,6 +41,35 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install buildozer cython virtualenv
+
+    - name: Install Android SDK & NDK
+      run: |
+        set -e
+        export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
+        mkdir -p "$ANDROID_SDK_ROOT"
+
+        # Download Android command line tools (update URL if Google changes it)
+        cd /tmp
+        curl -fsSL -o commandlinetools.zip "https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
+        mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+        unzip -q commandlinetools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+        # Move into the 'latest' folder expected by sdkmanager
+        mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+
+        # Accept licenses and install platform-tools, platform, build-tools and a stable NDK
+        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses
+        sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2" "ndk;21.4.7075529"
+
+        # Export environment variables for Buildozer
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
+        echo "ANDROIDNDK=$ANDROID_SDK_ROOT/ndk/21.4.7075529" >> $GITHUB_ENV
+        # Ensure sdkmanager and platform-tools are on PATH for subsequent steps
+        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
     - name: Build APK with Buildozer
       run: |
